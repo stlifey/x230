@@ -1,0 +1,2 @@
+event=ibm/hotkey HKEY 00000080 00001004
+action=/etc/acpi/actions/sleepbtn.sh

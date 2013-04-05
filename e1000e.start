@@ -1,0 +1,1 @@
+ifconfig enp0s25 mtu 576 up

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+led="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::micmute/brightness"
+if [[ $(amixer sget Mic) == *"[off]"* ]]; then
+	[[ -f $led ]] && echo 1 > $led
+fi

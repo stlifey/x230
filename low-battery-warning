@@ -1,0 +1,13 @@
+#!/bin/sh
+
+STATE=`cat /sys/class/power_supply/AC/online`
+
+if [ "$STATE" -eq "1" ] ; then
+  exit 0
+fi
+
+AVG=`cat /sys/class/power_supply/BAT0/capacity`
+
+if [ "$AVG" -lt "10" ]; then
+  /bin/echo '14 blink' > /proc/acpi/ibm/led
+fi

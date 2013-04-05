@@ -1,0 +1,90 @@
+# Conky, a system monitor, based on torsmo
+#
+# Any original torsmo code is licensed under the BSD license
+#
+# All code written since the fork of torsmo is licensed under the GPL
+#
+# Please see COPYING for details
+#
+# Copyright (c) 2004, Hannu Saransaari and Lauri Hakkarainen
+# Copyright (c) 2005-2010 Brenden Matthews, Philip Kovacs, et. al. (see AUTHORS)
+# All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+gap_y 0
+gap_x 10
+
+alignment top_left
+
+use_xft yes
+xftfont Ubuntu:bold:size=14
+
+color0 000000
+color1 300046
+
+draw_shades no
+update_interval 1
+
+double_buffer yes
+
+TEXT
+${voffset 10}${color1}Main System
+$color0 Uptime:$color1 $uptime $color0 Brightness:$color1 ${exec cat /sys/class/backlight/acpi_video0/actual_brightness} / ${exec cat /sys/class/backlight/acpi_video0/max_brightness}
+$color0 Laptop Mode:$color1 $laptop_mode $color0 BAT0/BAT1:$color1 ${battery_percent BAT0}/${battery_percent BAT1}% $color0 AC State:$color1${acpiacadapter}
+$color0 CPU:$color1 ${execi 10000 cat /proc/cpuinfo | grep "model name" -m1 | cut -d":" -f2 | cut -d" " -f2-}
+$color0 Kernel:$color1 $kernel ${execi 1000 uname -v | cut -c1-25}
+$color0 CST Time&Date:$color1 ${exec date}
+$color0 UTC Time&Date:$color1 ${exec date -u}
+$color0 BAT0 Current/Full/Design:$color1 ${execi 5 echo $(expr $(cat /sys/class/power_supply/BAT0/energy_now) / 10000)}/${execi 10000 echo $(expr $(cat /sys/class/power_supply/BAT0/energy_full) / 10000)}/${execi 10000 echo $(expr $(cat /sys/class/power_supply/BAT0/energy_full_design) / 10000)} mAh
+$color0 BAT1 Current/Full/Design:$color1 ${execi 5 echo $(expr $(cat /sys/class/power_supply/BAT1/energy_now) / 10000)}/${execi 10000 echo $(expr $(cat /sys/class/power_supply/BAT1/energy_full) / 10000)}/${execi 10000 echo $(expr $(cat /sys/class/power_supply/BAT1/energy_full_design) / 10000)} mAh
+$color0 Master/Speaker/Headphone Volume:$color1 ${execi 6 amixer get Master | awk -F'[]%[]' '/%/ {if ($7 == "off") { print "Mute" } else { print $2"%" }}'}/${execi 6 amixer get Speaker | awk -F'[]%[]' '/%/ {if ($7 == "off") { print "Mute" } else { print $2"%" }}' | head -n1}/${execi 6 amixer get Headphone | awk -F'[]%[]' '/%/ {if ($7 == "off") { print "Mute" } else { print $2"%" }}' | head -n1}
+${voffset 10}${color1}Core Hardware
+$color0 ThinkPad Fan Speed: $color1 ${ibm_fan} RPM
+$color0 CPU0/1/2/3 Frequency: $color1${freq_g 1} / ${freq_g 2} / ${freq_g 3} / ${freq_g } GHz $color0
+$color0 CPU0 Usage: $color1${cpu cpu0}% $color0 ${cpugraph cpu0 8,200 000000 300046}
+$color0 CPU1 Usage: $color1${cpu cpu1}% $color0 ${cpugraph cpu1 8,200 000000 300046}
+$color0 CPU2 Usage: $color1${cpu cpu2}% $color0 ${cpugraph cpu2 8,200 000000 300046}
+$color0 CPU3 Usage: $color1${cpu cpu3}% $color0 ${cpugraph cpu3 8,200 000000 300046}
+$color0 DISK I/O(SDA): $color1${diskio /dev/sda}/s $color0 ${diskiograph /dev/sda 8,210 000000 300046}
+$color0 DISK I/O(SDB): $color1${diskio /dev/sdb}/s $color0 ${diskiograph /dev/sdb 8,210 000000 300046}
+#$color0 DISK I/O(SDC): $color1${diskio /dev/sdc}/s $color0 ${diskiograph /dev/sdc 8,210 000000 300046}
+#$color0 DISK I/O(SDD): $color1${diskio /dev/sdd}/s $color0 ${diskiograph /dev/sdd 8,210 000000 300046}
+${color0} CPU/ACPI/DISK Temperature: $color1 ${exec sensors | grep 'coretemp-isa-0000' -A 2 | grep "Physical" | cut -c18-19} / ${acpitemp} / ${hddtemp /dev/sda} C
+${color0} SDA DISK S.M.A.R.T Reallocated Event Count: $color1 ${execi 10000 sudo smartctl -A /dev/sda | grep "Reallocated_Event_Count" | cut -c88-90}
+${voffset 10}${color1}System Recourse
+${color1}Memory
+$color0 Total:$color1 ${memmax} Used:$color1 ${mem} ${memperc}%
+$color0 Usage:$color1 ${membar 8,310}
+${color1}HDD (${fs_type /mnt/hdd})
+$color0 Total:$color1 ${fs_size /mnt/hdd} $color0 Free:$color1 ${fs_free /mnt/hdd} ${fs_free_perc /mnt/hdd}%
+$color0 Usage:$color1 ${fs_bar 8,310 /mnt/hdd}
+${color1}SSD (${fs_type /mnt/ssd})
+$color0 Total:$color1 ${fs_size /mnt/ssd} $color0 Free:$color1 ${fs_free /mnt/ssd} ${fs_free_perc /mnt/ssd}%
+$color0 Usage:$color1 ${fs_bar 8,310 /mnt/ssd}
+${color1}RAMDisk (${fs_type /tmp})
+$color0 Total:$color1 ${fs_size /tmp} $color0 Free:$color1 ${fs_free /tmp} ${fs_free_perc /tmp}%
+$color0 Usage:$color1 ${fs_bar 8,310 /tmp}
+${color1}Unixlog (${fs_type /var/log})
+$color0 Total:$color1 ${fs_size /var/log} $color0 Free:$color1 ${fs_free /var/log} ${fs_free_perc /var/log}%
+$color0 Usage:$color1 ${fs_bar 8,310 /var/log}
+${voffset 10}${color1}Network State
+$color0 NetCard:$color1 WIRELESS $color0 IPv4: $color1${addr wlp3s0}
+$color0 ESSID: $color1${wireless_essid wlp3s0}$color1${wireless_link_qual_perc wlp3s0}% $color0 Mac: $color1${wireless_ap wlp3s0}
+$color0 Down: $color1${downspeed wlp3s0}/s $color0 ${downspeedgraph wlp3s0 8,100 000000 300046} $color1 Total: ${totaldown wlp3s0} 
+$color0 Up: $color1${upspeed wlp3s0}/s $color0 ${upspeedgraph wlp3s0 8,100 000000 300046} $color0 Total: $color1${totalup wlp3s0}
+$color0 NetCard:$color1 WIRED $color0 IPv4: $color1${addr enp0s25}
+$color0 Down: $color1${downspeed enp0s25}/s $color0 ${downspeedgraph enp0s25 8,100 000000 300046} $color0 Total: $color1${totaldown enp0s25}
+$color0 Up: $color1${upspeed enp0s25}/s $color0 ${upspeedgraph enp0s25 8,100 000000 300046} $color0 Total: $color1${totalup enp0s25}

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+MAIN=$1
+EXTENDED=$2
+
+## GET INFO
+STATUS=`xrandr`
+CONNECTED=$(echo "$STATUS" | grep " connected" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/")
+ACTIVE=$(echo "$STATUS" | grep -e " connected [^(]" | sed -e "s/\([A-Z0-9]\+\) connected.*/\1/")
+CONNECTEDNUM=$(echo $CONNECTED | wc -w) # 2
+ACTIVENUM=$(echo $ACTIVE | wc -w) # 2
+HORIZONTALLENGTH=$(echo "$STATUS" | grep "$MAIN" -A 1 | sed -e '1d' | cut -c 4-7)
+
+## CHECK AND TOGGLE
+if [ $CONNECTEDNUM -ne 1 ]
+then
+	if [ $ACTIVENUM -eq 1 ]
+	then
+		xrandr --output $MAIN --auto --output $EXTENDED --auto --pos "$HORIZONTALLENGTH"x0
+	else
+		xrandr --output $MAIN --auto --output $EXTENDED --off
+	fi
+else
+	xrandr --output $MAIN --auto
+fi
